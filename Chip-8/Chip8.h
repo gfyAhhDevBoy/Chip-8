@@ -72,11 +72,6 @@ struct Chip8 {
 
 	void LoadROM(char const* filepath);
 
-	bool SaveState(char const* filepath);
-	bool LoadState(char const* filepath, Chip8State& state);
-	Chip8State GetState() const;
-	void SetState(const Chip8State& state);
-
 	void Table0()
 	{
 		((*this).*(table0[opcode & 0x000Fu]))();
@@ -180,6 +175,8 @@ struct Chip8 {
 		u8 y = (opcode & 0x00F0u) >> 4u;
 
 		V[x] |= V[y];
+		V[0xF] = 0;
+
 	}
 
 	void OP_8xy2() {
@@ -187,6 +184,8 @@ struct Chip8 {
 		u8 y = (opcode & 0x00F0u) >> 4u;
 
 		V[x] &= V[y];
+		V[0xF] = 0;
+
 	}
 
 	void OP_8xy3() {
@@ -194,6 +193,8 @@ struct Chip8 {
 		u8 y = (opcode & 0x00F0u) >> 4u;
 
 		V[x] ^= V[y];
+		V[0xF] = 0;
+
 	}
 
 	void OP_8xy4() {
@@ -460,20 +461,6 @@ struct Chip8 {
 #pragma endregion
 };
 
-struct Chip8State {
-	u8 memory[4096]{};
-	// registers
-	u8 V[16]{};
-	u16 I{}; // index register: memory address pointer
-	u16 pc{}; // program counter
-	u8 sp{}; // points to topmost level of stack
-	u8 delay_reg{}; // Decrement by 60Hz when non-zero
-	u8 sound_reg{}; // Decrement by 60Hz when non-zero
-	u16 stack[16]{};
-	u32 framebuf[64 * 32]{};
-	u8 keypad[16]{};
-
-};
 
 Chip8::Chip8() : randgen(std::chrono::system_clock::now().time_since_epoch().count()) {
 	pc = ROM_START_ADDRESS;
@@ -558,50 +545,6 @@ void Chip8::LoadROM(char const* filepath) {
 
 		delete[] buffer;
 	}
-}
-
-bool Chip8::SaveState(char const* filepath)
-{
-	std::ofstream file(filepath, std::ios::binary);
-	if (!file) return false;
-	file.write(reinterpret_cast<const char*>(&GetState()), sizeof(Chip8State));
-	return file.good();
-}
-
-bool Chip8::LoadState(char const* filepath, Chip8State& state)
-{
-	std::ifstream file(filepath, std::ios::binary);
-	if (!file)return false;
-	file.read(reinterpret_cast<char*>(&state), sizeof(Chip8State));
-	return file.good();
-}
-
-Chip8State Chip8::GetState() const
-{
-	Chip8State state;
-	memcpy(state.memory, memory, sizeof(memory));
-	memcpy(state.V, V, sizeof(V));
-	state.I = I;
-	state.pc = pc;
-	memcpy(state.stack, stack, sizeof(stack));
-	state.sp = sp;
-	state.delay_reg = delay_reg;
-	state.sound_reg = sound_reg;
-	memcpy(state.keypad, keypad, sizeof(keypad));
-	return state;
-}
-
-inline void Chip8::SetState(const Chip8State& state)
-{
-	memcpy(memory, state.memory, sizeof(memory));
-	memcpy(V, state.V, sizeof(V));
-	I = state.I;
-	pc = state.pc;
-	memcpy(stack, state.stack, sizeof(stack));
-	sp = state.sp;
-	delay_reg = state.delay_reg;
-	sound_reg = state.sound_reg;
-	memcpy(keypad, state.keypad, sizeof(keypad));
 }
 
 void PlayBeep() {

@@ -24,12 +24,9 @@ public:
 
 	void Update(void const* buffer, int pitch) {
 		SDL_UpdateTexture(texture, nullptr, buffer, pitch);
-		SDL_SetTextureColorMod(texture, 127, 255, 92);
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 		SDL_RenderPresent(renderer);
-
-
 	}
 
 	bool ProcessInput(u8* keys) {

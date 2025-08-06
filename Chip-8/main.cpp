@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
 	int videoScale = std::stoi(argv[1]);
 	int cycleDelay = std::stoi(argv[2]);
-	char const* romFilename = argv[3];
+	const char* romFilename = argv[3];
 
 	Platform platform("CHIP-8 Emulator", FRAMEBUF_WIDTH * videoScale, FRAMEBUF_HEIGHT * videoScale, FRAMEBUF_WIDTH, FRAMEBUF_HEIGHT);
 

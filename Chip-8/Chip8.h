@@ -471,7 +471,6 @@ Chip8::Chip8() : randgen(std::chrono::system_clock::now().time_since_epoch().cou
 
 	randbyte = std::uniform_int_distribution<int>(0, 255U);
 
-	// Set up function pointer table
 	table[0x0] = &Chip8::Table0;
 	table[0x1] = &Chip8::OP_1nnn;
 	table[0x2] = &Chip8::OP_2nnn;
